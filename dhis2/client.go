@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const httpTimeOutSec = 5
+const httpTimeOutSec = 1
 
 type Client struct {
 	Username string
