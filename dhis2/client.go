@@ -23,7 +23,7 @@ type Info struct {
 // get dhis2 info
 func (c *Client) GetInfo() (*Info, error) {
 	info := &Info{}
-	err := c.doRequest("/api/40/system/info", info)
+	err := c.doRequest("/api/system/info", info)
 	if err != nil {
 		return nil, err
 	}
