@@ -1,0 +1,8 @@
+alphasms_api_key: "key"
+dhis2_endpoints:
+  - base_url: "https://<ednpoint-01>"
+    username: "username"
+    password: "password"
+  - base_url: "https://<ednpoint-02>"
+    username: "username"
+    password: "password"
