@@ -8,11 +8,10 @@ import (
 	"net/http"
 )
 
-const BaseUrl string = "https://dhis2-htn-tracking.simple.org"
-
 type Client struct {
 	Username string
 	Password string
+	BaseURL  string
 }
 
 type Info struct {
@@ -34,7 +33,7 @@ func (c *Client) GetInfo() (*Info, error) {
 
 // common method to do request
 func (c *Client) doRequest(path string, result interface{}) error {
-	url := fmt.Sprintf("%s%s", BaseUrl, path)
+	url := fmt.Sprintf("%s%s", c.BaseURL, path)
 
 	// Create a new request
 	req, err := http.NewRequest("GET", url, nil)
