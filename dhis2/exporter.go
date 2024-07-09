@@ -34,7 +34,7 @@ func NewExporter(client *Client) *Exporter {
 			Namespace: "dhis2",
 			Name:      dynamicName,
 			Help:      "Information about the DHIS2 system",
-		}, []string{"version", "revision", "contextPath"}),
+		}, []string{"version", "revision", "contextPath", "buildTime"}),
 	}
 }
 
@@ -53,7 +53,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	// Set the version and revision as labels; gauge value is less meaningful here, just set to 1
-	e.info.WithLabelValues(info.Version, info.Revision, info.ContextPath).Set(1)
+	e.info.WithLabelValues(info.Version, info.Revision, info.ContextPath, info.BuildTime).Set(1)
 
 	e.info.Collect(ch)
 }

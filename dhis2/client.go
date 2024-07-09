@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const httpTimeOutSec = 10
+const httpTimeOutSec = 5
 
 type Client struct {
 	Username string
@@ -22,6 +22,7 @@ type Info struct {
 	ContextPath string `json:"contextPath"`
 	Version     string `json:"version"`
 	Revision    string `json:"revision"`
+	BuildTime   string `json:"buildTime"`
 }
 
 // get dhis2 info
