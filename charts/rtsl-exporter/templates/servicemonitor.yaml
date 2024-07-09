@@ -1,0 +1,17 @@
+{{ if .Values.monitoring.enabledServiceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rtsl-exporter.fullname" . }}
+  labels:
+    {{- include "rtsl-exporter.labels" . | nindent 4 }}
+spec:
+  jobLabel: {{ include "rtsl-exporter.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "rtsl-exporter.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+{{ end }}

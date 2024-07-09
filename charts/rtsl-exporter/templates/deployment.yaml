@@ -24,18 +24,19 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: config-yaml
+          secret:
+            secretName: {{ .Values.existingConfigSecrete.name }}
+            items:
+              - key: {{ .Values.existingConfigSecrete.key }}
+                path: {{ .Values.existingConfigSecrete.path }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: ALPHASMS_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.existingSecrete.name }}
-                  key: {{ .Values.existingSecrete.key }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -50,6 +51,10 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-yaml
+              mountPath: "/app/{{ .Values.existingConfigSecrete.path }}"
+              subPath: {{ .Values.existingConfigSecrete.path }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

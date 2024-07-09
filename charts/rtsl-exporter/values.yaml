@@ -10,10 +10,11 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-existingSecrete:
-  name: "alphasms-secrets"
-  key: "api-key"
- 
+existingConfigSecrete:
+  name: "rtsl-exporter"
+  key: "config"
+  path: "config.yaml"
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -58,3 +59,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+monitoring:
+  enabledServiceMonitor: true
