@@ -25,4 +25,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: simpledotorg/rtsl_exporter:${{ github.sha }} simpledotorg/rtsl_exporter:latest
+          tags: simpledotorg/rtsl_exporter:${{ github.sha }}, simpledotorg/rtsl_exporter:latest
