@@ -1,4 +1,4 @@
-module github.com/simpledotorg/alphasms_exporter
+module github.com/simpledotorg/rtsl_exporter
 
 go 1.21.1
 

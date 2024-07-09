@@ -7,8 +7,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/simpledotorg/alphasms_exporter/alphasms"
-	"github.com/simpledotorg/alphasms_exporter/dhis2"
+	"github.com/simpledotorg/rtsl_exporter/alphasms"
+	"github.com/simpledotorg/rtsl_exporter/dhis2"
 	"gopkg.in/yaml.v2"
 )
 

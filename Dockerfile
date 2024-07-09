@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o alphasms_exporter
+RUN go build -o rtsl_exporter
 
 EXPOSE 8080
-CMD ["./alphasms_exporter"]
+CMD ["./rtsl_exporter"]

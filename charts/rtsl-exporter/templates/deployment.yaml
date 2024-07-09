@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "alphasms-exporter.fullname" . }}
+  name: {{ include "rtsl-exporter.fullname" . }}
   labels:
-    {{- include "alphasms-exporter.labels" . | nindent 4 }}
+    {{- include "rtsl-exporter.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "alphasms-exporter.selectorLabels" . | nindent 6 }}
+      {{- include "rtsl-exporter.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -16,7 +16,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "alphasms-exporter.selectorLabels" . | nindent 8 }}
+        {{- include "rtsl-exporter.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

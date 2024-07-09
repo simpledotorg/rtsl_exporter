@@ -1,11 +1,11 @@
-# Default values for alphasms-exporter.
+# Default values for rtsl-exporter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: simpledotorg/alphasms_exporter
+  repository: simpledotorg/rtsl_exporter
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"

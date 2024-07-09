@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "alphasms-exporter.name" -}}
+{{- define "rtsl-exporter.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "alphasms-exporter.fullname" -}}
+{{- define "rtsl-exporter.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "alphasms-exporter.chart" -}}
+{{- define "rtsl-exporter.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "alphasms-exporter.labels" -}}
-helm.sh/chart: {{ include "alphasms-exporter.chart" . }}
-{{ include "alphasms-exporter.selectorLabels" . }}
+{{- define "rtsl-exporter.labels" -}}
+helm.sh/chart: {{ include "rtsl-exporter.chart" . }}
+{{ include "rtsl-exporter.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "alphasms-exporter.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "alphasms-exporter.name" . }}
+{{- define "rtsl-exporter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "rtsl-exporter.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "alphasms-exporter.serviceAccountName" -}}
+{{- define "rtsl-exporter.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "alphasms-exporter.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "rtsl-exporter.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

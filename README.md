@@ -1,6 +1,6 @@
-# AlphaSMS Exporter for Prometheus
+# RTSL Exporter for Prometheus
 
-A Prometheus exporter that exposes metrics from the AlphaSMS API.
+A Prometheus exporter that exposes multiple custom metrics.
 
 
 > [!WARNING]  
@@ -12,13 +12,13 @@ A Prometheus exporter that exposes metrics from the AlphaSMS API.
 1. Clone this repository.
 
 ```sh
-git clone https://github.com/yourusername/alphasms_exporter
+git clone https://github.com/simpledotorg/rtsl_exporter
 ```
 
 2. Navigate to the project directory.
 
 ```sh
-cd alphasms_exporter
+cd rtsl_exporter
 ```
 
 3. Set the AlphaSMS API key as an environment variable.
@@ -31,8 +31,8 @@ export ALPHASMS_API_KEY=your-api-key
 4. Build and Run
 
 ```sh
-go build -o alphasms_exporter
-./alphasms_exporter
+go build -o rtsl_exporter
+./rtsl_exporter
 ```
 
 Now, you can find your metrics at `http://localhost:8080/metrics`.
@@ -42,8 +42,8 @@ Now, you can find your metrics at `http://localhost:8080/metrics`.
 You can build and run this exporter using Docker:
 
 ```sh
-docker build -t alphasms_exporter .
-docker run -p 8080:8080  -e ALPHASMS_API_KEY='your-api-key' alphasms_exporter
+docker build -t rtsl_exporter .
+docker run -p 8080:8080  -e ALPHASMS_API_KEY='your-api-key' rtsl_exporter
 ```
 
 Replace `your-api-key` with your actual API key.
