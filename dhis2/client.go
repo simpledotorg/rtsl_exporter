@@ -1,12 +1,16 @@
 package dhis2
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
+
+const httpTimeOutSec = 10
 
 type Client struct {
 	Username string
@@ -33,10 +37,14 @@ func (c *Client) GetInfo() (*Info, error) {
 
 // common method to do request
 func (c *Client) doRequest(path string, result interface{}) error {
+	// Create a context with a timeout
+	ctx, cancel := context.WithTimeout(context.Background(), httpTimeOutSec*time.Second)
+	defer cancel()
+
 	url := fmt.Sprintf("%s%s", c.BaseURL, path)
 
 	// Create a new request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}
