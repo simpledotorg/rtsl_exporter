@@ -21,11 +21,11 @@ git clone https://github.com/simpledotorg/rtsl_exporter
 cd rtsl_exporter
 ```
 
-3. Set the AlphaSMS API key as an environment variable.
-   Ensure to replace `your-api-key` with your actual API key.
+3. Create and update config.yaml file
    
 ```sh
-export ALPHASMS_API_KEY=your-api-key
+cp config.yaml.sample config.yaml
+# Update the sample values
 ```
 
 4. Build and Run
@@ -42,11 +42,12 @@ Now, you can find your metrics at `http://localhost:8080/metrics`.
 You can build and run this exporter using Docker:
 
 ```sh
-docker build -t rtsl_exporter .
-docker run -p 8080:8080  -e ALPHASMS_API_KEY='your-api-key' rtsl_exporter
-```
+cp config.yaml.sample config.yaml
+# Update the sample values
 
-Replace `your-api-key` with your actual API key.
+docker build -t rtsl_exporter .
+docker run -p 8080:8080 -v ./config.yaml:/app/config.yaml rtsl_exporter
+```
 
 ## Metrics
 
@@ -55,15 +56,6 @@ This exporter provides the following metrics:
 - alphasms_user_balance_amount: The current balance amount
 - alphasms_user_balance_error: The current error code while connecting to api
 - alphasms_user_balance_validity: Validity date of balance amount
+- dhis2_system_info_<domain name>: Information about the DHIS2 system
 
 Exporter will also include exporter specific metrics
-
-## Adding More Metrics
-
-To expose more metrics from the AlphaSMS API, you can:
-
-1. Define new methods similar to `GetUserBalance` in `alphasms/client.go`
-
-2. In `alphasms/exporter.go`, define new Prometheus metrics and update the `Describe` and `Collect` methods accordingly.
-
-3. Add the invocation of your new methods to the `Collect` method.
