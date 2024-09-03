@@ -73,6 +73,7 @@ func main() {
 		log.Fatalf("Error reading config file: %v", err)
 	}
 
+	// Alphasms
 	if config.ALPHASMSAPIKey == "" {
 		log.Fatalf("ALPHASMS_API_KEY not provided in config file")
 	}
@@ -80,15 +81,18 @@ func main() {
 	alphasmsExporter := alphasms.NewExporter(&alphasmsClient)
 	prometheus.MustRegister(alphasmsExporter)
 
+	// DHIS2
+	dhis2Clients := []*dhis2.Client{}
 	for _, endpoint := range config.DHIS2Endpoints {
 		dhis2Client := dhis2.Client{
 			Username: endpoint.Username,
 			Password: endpoint.Password,
 			BaseURL:  endpoint.BaseURL,
 		}
-		dhis2Exporter := dhis2.NewExporter(&dhis2Client)
-		prometheus.MustRegister(dhis2Exporter)
+		dhis2Clients = append(dhis2Clients, &dhis2Client)
 	}
+	dhis2Exporter := dhis2.NewExporter(dhis2Clients)
+	prometheus.MustRegister(dhis2Exporter)
 
 	// Register SendGrid exporters
 	apiKeys := make(map[string]string)
