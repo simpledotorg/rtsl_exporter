@@ -9,11 +9,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
 	"github.com/simpledotorg/rtsl_exporter/dhis2"
-	"gopkg.in/yaml.v2"
+	"github.com/simpledotorg/rtsl_exporter/sendgrid"
 )
 
 type Config struct {
 	ALPHASMSAPIKey string `yaml:"alphasms_api_key"`
+	SendGridAccounts []struct {
+		AccountName string `yaml:"account_name"`
+		APIKey      string `yaml:"api_key"`
+	} `yaml:"sendgrid_accounts"`
 	DHIS2Endpoints []struct {
 		BaseURL  string `yaml:"base_url"`
 		Username string `yaml:"username"`
@@ -57,6 +61,16 @@ func main() {
 		prometheus.MustRegister(dhis2Exporter)
 	}
 
+	// Register SendGrid exporters
+	apiKeys := make(map[string]string)
+	for _, account := range config.SendGridAccounts {
+		apiKeys[account.AccountName] = account.APIKey
+	}
+	sendgridExporter := sendgrid.NewExporter(apiKeys)
+	prometheus.MustRegister(sendgridExporter)
+
 	http.Handle("/metrics", promhttp.Handler())
+	log.Println("Starting server on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 	http.ListenAndServe(":8080", nil)
 }
