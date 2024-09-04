@@ -33,22 +33,21 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 // Collect is called by the Prometheus registry when collecting metrics.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	for _, client := range e.clients {
 		wg.Add(1)
-
 		go func(client *Client) {
 			defer wg.Done()
-
 			info, err := client.GetInfo()
 			if err != nil {
 				log.Printf("Failed to get system information from %s: %v\n", client.BaseURL, err)
 				return
 			}
 
-			e.mutex.Lock()
+			mu.Lock()
 			e.info.WithLabelValues(info.Version, info.Revision, info.ContextPath, info.BuildTime).Set(1)
-			e.mutex.Unlock()
+			mu.Unlock()
 		}(client)
 	}
 

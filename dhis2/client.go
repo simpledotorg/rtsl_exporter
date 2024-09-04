@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 )
 
-const httpTimeOutSec = 1
+const httpConnectionSec = 1
 
 type Client struct {
 	Username string
@@ -51,9 +52,16 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	// Set Authorization header
 	req.Header.Set("Authorization", "Basic "+credentials)
 
+	// Custom Transport with Connect Timeout
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout: httpConnectionSec * time.Second,
+		}).DialContext,
+	}
+
 	// Make the request
 	client := &http.Client{
-		Timeout: httpTimeOutSec * time.Second,
+		Transport: transport,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
