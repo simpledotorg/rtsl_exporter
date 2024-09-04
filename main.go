@@ -10,6 +10,7 @@ import (
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
 	"github.com/simpledotorg/rtsl_exporter/dhis2"
 	"github.com/simpledotorg/rtsl_exporter/sendgrid"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
