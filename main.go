@@ -1,10 +1,13 @@
 package main
 
 import (
-	"io/ioutil"
+	"context"
+	"flag"
 	"log"
 	"net/http"
-
+	"os"
+	"os/signal"
+	"io/ioutil"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
@@ -40,6 +43,16 @@ func readConfig(configPath string) (*Config, error) {
 }
 
 func main() {
+	log.SetFlags(0)
+
+	var listenAddress = flag.String("listen", ":8080", "Listen address.")
+	flag.Parse()
+
+	if flag.NArg() != 0 {
+		flag.Usage()
+		log.Fatalf("\nERROR You MUST NOT pass any positional arguments")
+	}
+
 	config, err := readConfig("config.yaml")
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
@@ -71,7 +84,28 @@ func main() {
 	prometheus.MustRegister(sendgridExporter)
 
 	http.Handle("/metrics", promhttp.Handler())
-	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-	http.ListenAndServe(":8080", nil)
+	log.Printf("Starting server on %s", *listenAddress)
+
+	httpServer := http.Server{
+		Addr: *listenAddress,
+	}
+
+	idleConnectionsClosed := make(chan struct{})
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+		if err := httpServer.Shutdown(context.Background()); err != nil {
+			log.Printf("HTTP Server Shutdown Error: %v", err)
+		}
+		close(idleConnectionsClosed)
+	}()
+
+	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("HTTP server ListenAndServe Error: %v", err)
+	}
+
+	<-idleConnectionsClosed
+
+	log.Printf("Bye bye")
 }

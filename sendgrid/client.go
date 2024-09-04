@@ -12,8 +12,8 @@ type Client struct {
 	APIKeys map[string]string
 }
 
-// Metrics struct maps the SendGrid API response.
-type Metrics struct {
+// SendgridCreditsResponse maps the SendGrid API response.
+type SendgridCreditsResponse struct {
 	Total     float64 `json:"total"`
 	Remaining float64 `json:"remain"`
 	Used      float64 `json:"used"`
@@ -26,7 +26,7 @@ func NewClient(apiKeys map[string]string) *Client {
 }
 
 // FetchMetrics retrieves metrics from the SendGrid API for a specific account.
-func (c *Client) FetchMetrics(accountName string) (*Metrics, int, time.Duration, error) {
+func (c *Client) FetchMetrics(accountName string) (*SendgridCreditsResponse, int, time.Duration, error) {
 	apiKey, exists := c.APIKeys[accountName]
 	if !exists {
 		return nil, 0, 0, fmt.Errorf("API key for account %s not found", accountName)
@@ -52,10 +52,10 @@ func (c *Client) FetchMetrics(accountName string) (*Metrics, int, time.Duration,
 		return nil, resp.StatusCode, duration, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var metrics Metrics
-	if err := json.NewDecoder(resp.Body).Decode(&metrics); err != nil {
+	var creditsResponse SendgridCreditsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&creditsResponse); err != nil {
 		return nil, resp.StatusCode, duration, err
 	}
 
-	return &metrics, resp.StatusCode, duration, nil
+	return &creditsResponse, resp.StatusCode, duration, nil
 }

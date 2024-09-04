@@ -80,7 +80,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 		// Parse the plan expiration date
 		dateFormats := []string{
-			time.RFC3339,
 			"2006-01-02",
 		}
 
@@ -98,7 +97,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			continue
 		}
 
-		planResetDate = planResetDate.Add(24 * time.Hour)
+		// Calculate time until expiration
 		timeUntilExpiration := planResetDate.Sub(time.Now()).Seconds()
 		if timeUntilExpiration < 0 {
 			timeUntilExpiration = 0
