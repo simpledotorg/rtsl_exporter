@@ -64,6 +64,11 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	}
 	defer resp.Body.Close()
 
+	// Check if the status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	// Read the body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
