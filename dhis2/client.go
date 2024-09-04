@@ -1,7 +1,6 @@
 package dhis2
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -38,14 +37,10 @@ func (c *Client) GetInfo() (*Info, error) {
 
 // common method to do request
 func (c *Client) doRequest(path string, result interface{}) error {
-	// Create a context with a timeout
-	ctx, cancel := context.WithTimeout(context.Background(), httpTimeOutSec*time.Second)
-	defer cancel()
-
 	url := fmt.Sprintf("%s%s", c.BaseURL, path)
 
 	// Create a new request
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
@@ -57,7 +52,9 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	req.Header.Set("Authorization", "Basic "+credentials)
 
 	// Make the request
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: httpTimeOutSec * time.Second,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
