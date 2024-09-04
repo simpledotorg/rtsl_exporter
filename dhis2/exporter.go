@@ -10,7 +10,6 @@ import (
 type Exporter struct {
 	clients []*Client
 	info    *prometheus.GaugeVec
-	mutex   sync.Mutex
 }
 
 func NewExporter(clients []*Client) *Exporter {
