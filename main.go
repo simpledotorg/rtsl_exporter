@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"io/ioutil"
+	"time"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
@@ -40,6 +41,29 @@ func readConfig(configPath string) (*Config, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+func gracefulShutdown(server *http.Server) {
+	// Create a context with a timeout for the shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Notify when the shutdown process is complete
+	idleConnectionsClosed := make(chan struct{})
+	go func() {
+		defer close(idleConnectionsClosed)
+		if err := server.Shutdown(ctx); err != nil {
+			log.Printf("HTTP Server Shutdown Error: %v", err)
+		}
+	}()
+
+	// Wait for the server to shut down
+	select {
+	case <-ctx.Done():
+		log.Println("HTTP Server Shutdown Timeout")
+	case <-idleConnectionsClosed:
+		log.Println("HTTP Server Shutdown Complete")
+	}
 }
 
 func main() {
@@ -86,26 +110,21 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 	log.Printf("Starting server on %s", *listenAddress)
 
-	httpServer := http.Server{
+	httpServer := &http.Server{
 		Addr: *listenAddress,
 	}
 
-	idleConnectionsClosed := make(chan struct{})
 	go func() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
 		<-sigint
-		if err := httpServer.Shutdown(context.Background()); err != nil {
-			log.Printf("HTTP Server Shutdown Error: %v", err)
-		}
-		close(idleConnectionsClosed)
+		log.Println("Shutdown signal received")
+		gracefulShutdown(httpServer)
 	}()
 
 	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe Error: %v", err)
 	}
 
-	<-idleConnectionsClosed
-
-	log.Printf("Bye bye")
+	log.Println("Bye bye")
 }
