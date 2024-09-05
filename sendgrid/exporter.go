@@ -79,19 +79,8 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		e.emailUsed.WithLabelValues(accountName).Set(metrics.Used)
 
 		// Parse the plan expiration date
-		dateFormats := []string{
-			"2006-01-02",
-		}
-
-		var planResetDate time.Time
-		var parseErr error
-		for _, format := range dateFormats {
-			planResetDate, parseErr = time.Parse(format, metrics.NextReset)
-			if parseErr == nil {
-				break
-			}
-		}
-
+		dateFormat := "2006-01-02"
+		planResetDate, parseErr := time.Parse(dateFormat, metrics.NextReset)
 		if parseErr != nil {
 			log.Printf("Failed to parse plan reset date: %v", parseErr)
 			continue

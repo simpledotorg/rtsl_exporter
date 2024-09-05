@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -69,14 +68,6 @@ func gracefulShutdown(server *http.Server) {
 func main() {
 	log.SetFlags(0)
 
-	var listenAddress = flag.String("listen", ":8080", "Listen address.")
-	flag.Parse()
-
-	if flag.NArg() != 0 {
-		flag.Usage()
-		log.Fatalf("\nERROR You MUST NOT pass any positional arguments")
-	}
-
 	config, err := readConfig("config.yaml")
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
@@ -108,10 +99,10 @@ func main() {
 	prometheus.MustRegister(sendgridExporter)
 
 	http.Handle("/metrics", promhttp.Handler())
-	log.Printf("Starting server on %s", *listenAddress)
+	log.Println("Starting server on :8080")
 
 	httpServer := &http.Server{
-		Addr: *listenAddress,
+		Addr: ":8080",
 	}
 
 	go func() {
