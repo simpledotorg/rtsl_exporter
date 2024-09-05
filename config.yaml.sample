@@ -6,3 +6,8 @@ dhis2_endpoints:
   - base_url: "https://<ednpoint-02>"
     username: "username"
     password: "password"
+sendgrid_accounts:
+  - account_name: "Account1"
+    api_key: "key"
+  - account_name: "Account2"
+    api_key: "key"
