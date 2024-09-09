@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"io/ioutil"
 	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
@@ -17,7 +18,7 @@ import (
 )
 
 type Config struct {
-	ALPHASMSAPIKey string `yaml:"alphasms_api_key"`
+	ALPHASMSAPIKey   string `yaml:"alphasms_api_key"`
 	SendGridAccounts []struct {
 		AccountName string `yaml:"account_name"`
 		APIKey      string `yaml:"api_key"`
@@ -85,9 +86,10 @@ func main() {
 	dhis2Clients := []*dhis2.Client{}
 	for _, endpoint := range config.DHIS2Endpoints {
 		dhis2Client := dhis2.Client{
-			Username: endpoint.Username,
-			Password: endpoint.Password,
-			BaseURL:  endpoint.BaseURL,
+			Username:          endpoint.Username,
+			Password:          endpoint.Password,
+			BaseURL:           endpoint.BaseURL,
+			ConnectionTimeout: dhis2.DefaultConnectionTimeout,
 		}
 		dhis2Clients = append(dhis2Clients, &dhis2Client)
 	}

@@ -4,18 +4,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"time"
 )
 
-const httpConnectionSec = 1
+const DefaultConnectionTimeout = 1 * time.Second
 
 type Client struct {
-	Username string
-	Password string
-	BaseURL  string
+	Username          string
+	Password          string
+	BaseURL           string
+	ConnectionTimeout time.Duration
 }
 
 type Info struct {
@@ -43,7 +44,7 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	// Create a new request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create request: %w", err)
 	}
 
 	// Encode credentials
@@ -55,7 +56,7 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	// Custom Transport with Connect Timeout
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
-			Timeout: httpConnectionSec * time.Second,
+			Timeout: c.ConnectionTimeout,
 		}).DialContext,
 	}
 
@@ -65,7 +66,7 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -75,12 +76,15 @@ func (c *Client) doRequest(path string, result interface{}) error {
 	}
 
 	// Read the body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Unmarshal JSON response into result
 	err = json.Unmarshal(body, result)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+	return nil
 }
