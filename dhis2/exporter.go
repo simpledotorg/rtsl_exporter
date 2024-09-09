@@ -40,7 +40,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			info, err := client.GetInfo()
 			if err != nil {
-				log.Printf("Failed to get system information from %s: %v\n", client.BaseURL, err)
+				log.Printf("ERROR: Failed to get system information from %s: %v\n", client.BaseURL, err)
 				mu.Lock()
 				e.info.WithLabelValues("", "", client.BaseURL, "").Set(0)
 				mu.Unlock()
