@@ -10,7 +10,7 @@ import (
 type Exporter struct {
 	client *Client
 	emailLimit      *prometheus.GaugeVec
-	emailsRemaining *prometheus.GaugeVec
+	emailRemaining *prometheus.GaugeVec
 	emailUsed       *prometheus.GaugeVec
 	planExpiration  *prometheus.GaugeVec
 	httpReturnCode  *prometheus.GaugeVec
@@ -25,9 +25,9 @@ func NewExporter(apiKeys map[string]string) *Exporter {
 			Name:      "email_limit_count",
 			Help:      "The total email limit for the account.",
 		}, []string{"account_name"}),
-		emailsRemaining: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		emailRemaining: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sendgrid",
-			Name:      "emails_remaining_count",
+			Name:      "email_remaining_count",
 			Help:      "The number of emails remaining for the account.",
 		}, []string{"account_name"}),
 		emailUsed: prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -53,10 +53,11 @@ func NewExporter(apiKeys map[string]string) *Exporter {
 	}
 }
 
+
 // Describe sends the descriptions of the metrics to Prometheus.
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.emailLimit.Describe(ch)
-	e.emailsRemaining.Describe(ch)
+	e.emailRemaining.Describe(ch)
 	e.emailUsed.Describe(ch)
 	e.planExpiration.Describe(ch)
 	e.httpReturnCode.Describe(ch)
@@ -75,7 +76,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 		// Set metrics values for each account
 		e.emailLimit.WithLabelValues(accountName).Set(metrics.Total)
-		e.emailsRemaining.WithLabelValues(accountName).Set(metrics.Remaining)
+		e.emailRemaining.WithLabelValues(accountName).Set(metrics.Remaining)
 		e.emailUsed.WithLabelValues(accountName).Set(metrics.Used)
 
 		// Parse the plan expiration date
@@ -93,13 +94,13 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 
 		e.planExpiration.WithLabelValues(accountName).Set(timeUntilExpiration)
-		e.httpReturnCode.WithLabelValues(accountName).Set(float64(statusCode))
+		e.httpReturnCode.WithLabelValues(accountName).Set(float64(statusCode)) 
 		e.httpResponseTime.WithLabelValues(accountName).Set(responseTime.Seconds())
 	}
 
 	// Collect all metrics once
 	e.emailLimit.Collect(ch)
-	e.emailsRemaining.Collect(ch)
+	e.emailRemaining.Collect(ch)
 	e.emailUsed.Collect(ch)
 	e.planExpiration.Collect(ch)
 	e.httpReturnCode.Collect(ch)
