@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 	"github.com/stretchr/testify/assert"
 	"github.com/simpledotorg/rtsl_exporter/sendgrid"
 )
@@ -47,11 +48,12 @@ func TestFetchMetrics_Success(t *testing.T) {
 	tc := &TestContext{}
 	mockAPIKey := "mockAPIKey"
 	mockAccountName := "mockAccount"
+	today := time.Now().Format("2006-01-02")
 	mockResponse := sendgrid.SendgridCreditsResponse{
 		Total:     1000,
 		Remaining: 800,
 		Used:      200,
-		NextReset: "2024-12-01",
+		NextReset: today,
 	}
 	tc.Initialize(map[string]string{mockAccountName: mockAPIKey}, &mockResponse, http.StatusOK, nil)
 	defer tc.Cleanup()
