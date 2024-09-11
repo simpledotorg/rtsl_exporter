@@ -32,7 +32,7 @@ func TestFetchMetrics_Success(t *testing.T) {
 			Body:       ioutil.NopCloser(bytes.NewReader(mockResponseBody)),
 		},
 	}
-	// Create a new Client and override the Transport field
+	// Created a new Client and override the Transport field
 	client := sendgrid.NewClient(map[string]string{
 		mockAccountName: mockAPIKey,
 	})
@@ -55,7 +55,6 @@ func TestFetchMetrics_AccountNotFound(t *testing.T) {
 			Body:       ioutil.NopCloser(bytes.NewReader([]byte{})),
 		},
 	}
-	// Create a new Client and override the Transport field
 	client := sendgrid.NewClient(map[string]string{
 		mockAccountName: mockAPIKey,
 	})

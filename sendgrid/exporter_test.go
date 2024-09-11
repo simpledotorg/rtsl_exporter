@@ -17,13 +17,12 @@ func TestExporterCollect(t *testing.T) {
 			"used": 200,
 			"next_reset": "2024-02-20"
 		}`))
-	// Create a new Exporter
+	// Created a new Exporter
 	accountNames := map[string]string{
 		"mockAccount": "mockAPIKey",
 	}
 	exporter := NewExporter(accountNames)
 	t.Run("Successful metrics collection", func(t *testing.T) {
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_email_limit_count",
 			"sendgrid_email_remaining_count",
@@ -45,7 +44,6 @@ func TestExporterCollect(t *testing.T) {
 			httpmock.NewStringResponder(500, `{
 				"error": "Internal Server Error"
 			}`))
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_monitoring_http_return_code",
 			"sendgrid_monitoring_http_response_time_seconds",
@@ -61,7 +59,6 @@ func TestExporterCollect(t *testing.T) {
 		// Mock a timeout from the SendGrid API
 		httpmock.RegisterResponder("GET", "https://api.sendgrid.com/v3/user/credits",
 			httpmock.NewErrorResponder(http.ErrHandlerTimeout))
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_monitoring_http_return_code",
 			"sendgrid_monitoring_http_response_time_seconds",
@@ -81,7 +78,6 @@ func TestExporterCollect(t *testing.T) {
 				"remain": "INVALID",
 				"used": 200
 			}`))
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_monitoring_http_return_code",
 			"sendgrid_monitoring_http_response_time_seconds",
@@ -100,7 +96,6 @@ func TestExporterCollect(t *testing.T) {
 				"total": 1000,
 				"remain": 800
 			}`))
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_email_limit_count",
 			"sendgrid_email_remaining_count",
@@ -120,7 +115,6 @@ func TestExporterCollect(t *testing.T) {
 			httpmock.NewStringResponder(401, `{
 				"error": "Unauthorized"
 			}`))
-		// Define expected metric names
 		expectedMetrics := []string{
 			"sendgrid_monitoring_http_return_code",
 			"sendgrid_monitoring_http_response_time_seconds",
