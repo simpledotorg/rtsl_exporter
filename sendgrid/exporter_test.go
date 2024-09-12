@@ -1,6 +1,7 @@
 package sendgrid
 import (
 	"testing"
+	"time"
 	"github.com/jarcoal/httpmock"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 )
@@ -20,7 +21,11 @@ func TestExporterCollect(t *testing.T) {
 	accountNames := map[string]string{
 		"mockAccount": "mockAPIKey",
 	}
-	exporter := NewExporter(accountNames)
+
+	timeZones := map[string]*time.Location{
+		"mockAccount": time.UTC,
+	}
+	exporter := NewExporter(accountNames, timeZones)
 	t.Run("Successful metrics collection", func(t *testing.T) {
 		expectedMetrics := []string{
 			"sendgrid_email_limit_count",
