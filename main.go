@@ -1,4 +1,5 @@
 package main
+
 import (
 	"context"
 	"io/ioutil"
@@ -7,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
@@ -14,6 +16,7 @@ import (
 	"github.com/simpledotorg/rtsl_exporter/sendgrid"
 	"gopkg.in/yaml.v2"
 )
+
 type Config struct {
 	ALPHASMSAPIKey   string `yaml:"alphasms_api_key"`
 	SendGridAccounts []struct {
@@ -27,6 +30,7 @@ type Config struct {
 		Password string `yaml:"password"`
 	} `yaml:"dhis2_endpoints"`
 }
+
 func readConfig(configPath string) (*Config, error) {
 	config := &Config{}
 	yamlFile, err := ioutil.ReadFile(configPath)
@@ -39,6 +43,7 @@ func readConfig(configPath string) (*Config, error) {
 	}
 	return config, nil
 }
+
 func gracefulShutdown(server *http.Server) {
 	// Create a context with a timeout for the shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -59,12 +64,15 @@ func gracefulShutdown(server *http.Server) {
 		log.Println("HTTP Server Shutdown Complete")
 	}
 }
+
 func main() {
 	log.SetFlags(0)
+
 	config, err := readConfig("config.yaml")
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
+
 	// Alphasms
 	if config.ALPHASMSAPIKey == "" {
 		log.Fatalf("ALPHASMS_API_KEY not provided in config file")
@@ -72,6 +80,7 @@ func main() {
 	alphasmsClient := alphasms.Client{APIKey: config.ALPHASMSAPIKey}
 	alphasmsExporter := alphasms.NewExporter(&alphasmsClient)
 	prometheus.MustRegister(alphasmsExporter)
+
 	// DHIS2
 	dhis2Clients := []*dhis2.Client{}
 	for _, endpoint := range config.DHIS2Endpoints {
@@ -85,6 +94,7 @@ func main() {
 	}
 	dhis2Exporter := dhis2.NewExporter(dhis2Clients)
 	prometheus.MustRegister(dhis2Exporter)
+
 	// Register SendGrid exporters with time zones
 	apiKeys := make(map[string]string)
 	timeZones := make(map[string]*time.Location) // Added timeZones map
@@ -99,11 +109,14 @@ func main() {
 	}
 	sendgridExporter := sendgrid.NewExporter(apiKeys, timeZones) // Passed timeZones to Exporter
 	prometheus.MustRegister(sendgridExporter)
+
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println("Starting server on :8080")
+
 	httpServer := &http.Server{
 		Addr: ":8080",
 	}
+
 	go func() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
@@ -111,8 +124,10 @@ func main() {
 		log.Println("Shutdown signal received")
 		gracefulShutdown(httpServer)
 	}()
+
 	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe Error: %v", err)
 	}
+
 	log.Println("Bye bye")
 }

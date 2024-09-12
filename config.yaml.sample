@@ -9,7 +9,7 @@ dhis2_endpoints:
 sendgrid_accounts:
   - account_name: "Account1"
     api_key: "key"
-    time_zone: "time_zone"
+    time_zone: "timezone"
   - account_name: "Account2"
     api_key: "key"
-    time_zone: "time_zone"
+    time_zone: "timezone"
