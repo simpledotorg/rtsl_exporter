@@ -48,6 +48,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	apiResp, balanceData, err := e.client.GetUserBalance()
 	if err != nil {
 		log.Printf("Failed to get GetUserBalance: %v\n", err)
+		return
 	}
 
 	balance, err := strconv.ParseFloat(balanceData.Balance, 64)
