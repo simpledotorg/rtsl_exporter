@@ -8,19 +8,19 @@ import (
 )
 
 type Exporter struct {
-	client         *Client
-	timeZones      map[string]*time.Location
-	emailLimit     *prometheus.GaugeVec
-	emailRemaining *prometheus.GaugeVec
-	emailUsed      *prometheus.GaugeVec
-	planExpiration *prometheus.GaugeVec
-	httpReturnCode *prometheus.GaugeVec
+	client           *Client
+	timeZones        map[string]*time.Location
+	emailLimit       *prometheus.GaugeVec
+	emailRemaining   *prometheus.GaugeVec
+	emailUsed        *prometheus.GaugeVec
+	planExpiration   *prometheus.GaugeVec
+	httpReturnCode   *prometheus.GaugeVec
 	httpResponseTime *prometheus.GaugeVec
 }
 
 func NewExporter(apiKeys map[string]string, timeZones map[string]*time.Location) *Exporter {
 	return &Exporter{
-		client: NewClient(apiKeys),
+		client:    NewClient(apiKeys),
 		timeZones: timeZones,
 		emailLimit: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sendgrid",
@@ -73,7 +73,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			log.Printf("Failed to get metrics for account %s: %v", accountName, err)
 			continue
 		}
-		
+
 		// Set metrics values for each account
 		e.emailLimit.WithLabelValues(accountName).Set(metrics.Total)
 		e.emailRemaining.WithLabelValues(accountName).Set(metrics.Remaining)
@@ -86,7 +86,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			log.Printf("Failed to parse plan reset date for account %s: %v", accountName, parseErr)
 			continue
 		}
-		currentTime := time.Now().In(timeZone)	
+		currentTime := time.Now().In(timeZone)
 		timeUntilExpiration := planResetDate.Sub(currentTime).Seconds()
 
 		e.planExpiration.WithLabelValues(accountName).Set(timeUntilExpiration)
