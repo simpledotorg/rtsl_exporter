@@ -9,7 +9,7 @@ import (
 
 type Exporter struct {
 	client         *Client
-	timeZones      map[string]*time.Location // Added timeZones map
+	timeZones      map[string]*time.Location
 	emailLimit     *prometheus.GaugeVec
 	emailRemaining *prometheus.GaugeVec
 	emailUsed      *prometheus.GaugeVec
@@ -21,7 +21,7 @@ type Exporter struct {
 func NewExporter(apiKeys map[string]string, timeZones map[string]*time.Location) *Exporter {
 	return &Exporter{
 		client: NewClient(apiKeys),
-		timeZones: timeZones, // Added timeZones to Exporter
+		timeZones: timeZones,
 		emailLimit: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sendgrid",
 			Name:      "email_limit_count",
@@ -67,7 +67,6 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect retrieves metrics and sends them to Prometheus.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	// Collect metrics for each account
 	for accountName := range e.client.APIKeys {
 		metrics, statusCode, responseTime, err := e.client.FetchMetrics(accountName)
 		if err != nil {
@@ -79,11 +78,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		e.emailLimit.WithLabelValues(accountName).Set(metrics.Total)
 		e.emailRemaining.WithLabelValues(accountName).Set(metrics.Remaining)
 		e.emailUsed.WithLabelValues(accountName).Set(metrics.Used)
-		// Load the time zone for the account
-		timeZone, exists := e.timeZones[accountName]
-		if !exists {
-			timeZone = time.UTC // Default to UTC if the time zone is not provided
-		}
+		timeZone := e.timeZones[accountName]
 		// Parse the plan expiration date
 		dateFormat := "2006-01-02"
 		planResetDate, parseErr := time.ParseInLocation(dateFormat, metrics.NextReset, timeZone)
@@ -92,10 +87,8 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			continue
 		}
 		currentTime := time.Now().In(timeZone)	
-		// Calculate time until expiration
 		timeUntilExpiration := planResetDate.Sub(currentTime).Seconds()
 
-		log.Printf("timeUntilExpiration: %+v", timeUntilExpiration)
 		e.planExpiration.WithLabelValues(accountName).Set(timeUntilExpiration)
 		e.httpReturnCode.WithLabelValues(accountName).Set(float64(statusCode))
 		e.httpResponseTime.WithLabelValues(accountName).Set(responseTime.Seconds())

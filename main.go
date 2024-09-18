@@ -97,7 +97,7 @@ func main() {
 
 	// Register SendGrid exporters with time zones
 	apiKeys := make(map[string]string)
-	timeZones := make(map[string]*time.Location) // Added timeZones map
+	timeZones := make(map[string]*time.Location)
 	for _, account := range config.SendGridAccounts {
 		apiKeys[account.AccountName] = account.APIKey
 		loc, err := time.LoadLocation(account.TimeZone)
