@@ -35,8 +35,8 @@ func NewExporter(accounts map[string]AccountConfig) *Exporter {
 		timeZones[accountName] = loc
 	}
 	return &Exporter{
-		client:    NewClient(apiKeys), // Pass apiKeys map directly
-		timeZones: timeZones,          // Pass timeZones map
+		client:    NewClient(apiKeys),
+		timeZones: timeZones,
 		emailLimit: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sendgrid",
 			Name:      "email_limit_count",
