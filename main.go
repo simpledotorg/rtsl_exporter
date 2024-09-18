@@ -22,7 +22,7 @@ type Config struct {
 	SendGridAccounts []struct {
 		AccountName string `yaml:"account_name"`
 		APIKey      string `yaml:"api_key"`
-		TimeZone    string `yaml:"time_zone"` // Added TimeZone field
+		TimeZone    string `yaml:"time_zone"`
 	} `yaml:"sendgrid_accounts"`
 	DHIS2Endpoints []struct {
 		BaseURL  string `yaml:"base_url"`
@@ -45,10 +45,8 @@ func readConfig(configPath string) (*Config, error) {
 }
 
 func gracefulShutdown(server *http.Server) {
-	// Create a context with a timeout for the shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	// Notify when the shutdown process is complete
 	idleConnectionsClosed := make(chan struct{})
 	go func() {
 		defer close(idleConnectionsClosed)
@@ -107,7 +105,7 @@ func main() {
 		}
 		timeZones[account.AccountName] = loc
 	}
-	sendgridExporter := sendgrid.NewExporter(apiKeys, timeZones) // Passed timeZones to Exporter
+	sendgridExporter := sendgrid.NewExporter(apiKeys, timeZones)
 	prometheus.MustRegister(sendgridExporter)
 
 	http.Handle("/metrics", promhttp.Handler())
