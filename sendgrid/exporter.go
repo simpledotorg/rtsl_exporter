@@ -1,25 +1,42 @@
 package sendgrid
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"log"
 	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Exporter struct {
-	client *Client
-	emailLimit      *prometheus.GaugeVec
-	emailRemaining *prometheus.GaugeVec
-	emailUsed       *prometheus.GaugeVec
-	planExpiration  *prometheus.GaugeVec
-	httpReturnCode  *prometheus.GaugeVec
+	client           *Client
+	timeZones        map[string]*time.Location // Map of time locations
+	emailLimit       *prometheus.GaugeVec
+	emailRemaining   *prometheus.GaugeVec
+	emailUsed        *prometheus.GaugeVec
+	planExpiration   *prometheus.GaugeVec
+	httpReturnCode   *prometheus.GaugeVec
 	httpResponseTime *prometheus.GaugeVec
 }
+type AccountConfig struct {
+	AccountName string `yaml:"account_name"`
+	APIKey      string `yaml:"api_key"`
+	TimeZone    string `yaml:"time_zone"`
+}
 
-func NewExporter(apiKeys map[string]string) *Exporter {
+func NewExporter(accounts map[string]AccountConfig) *Exporter {
+	apiKeys := make(map[string]string)
+	timeZones := make(map[string]*time.Location)
+	for accountName, accountConfig := range accounts {
+		apiKeys[accountName] = accountConfig.APIKey
+		loc, err := time.LoadLocation(accountConfig.TimeZone)
+		if err != nil {
+			log.Printf("Error loading time zone for account %s: %v", accountName, err)
+			loc = time.UTC // Default to UTC if time zone cannot be loaded
+		}
+		timeZones[accountName] = loc
+	}
 	return &Exporter{
-		client: NewClient(apiKeys),
+		client:    NewClient(apiKeys),
+		timeZones: timeZones,
 		emailLimit: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sendgrid",
 			Name:      "email_limit_count",
@@ -52,9 +69,6 @@ func NewExporter(apiKeys map[string]string) *Exporter {
 		}, []string{"account_name"}),
 	}
 }
-
-
-// Describe sends the descriptions of the metrics to Prometheus.
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.emailLimit.Describe(ch)
 	e.emailRemaining.Describe(ch)
@@ -63,42 +77,29 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.httpReturnCode.Describe(ch)
 	e.httpResponseTime.Describe(ch)
 }
-
-// Collect retrieves metrics and sends them to Prometheus.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	// Collect metrics for each account
 	for accountName := range e.client.APIKeys {
 		metrics, statusCode, responseTime, err := e.client.FetchMetrics(accountName)
 		if err != nil {
 			log.Printf("Failed to get metrics for account %s: %v", accountName, err)
 			continue
 		}
-
-		// Set metrics values for each account
 		e.emailLimit.WithLabelValues(accountName).Set(metrics.Total)
 		e.emailRemaining.WithLabelValues(accountName).Set(metrics.Remaining)
 		e.emailUsed.WithLabelValues(accountName).Set(metrics.Used)
-
-		// Parse the plan expiration date
+		timeZone := e.timeZones[accountName]
 		dateFormat := "2006-01-02"
-		planResetDate, parseErr := time.Parse(dateFormat, metrics.NextReset)
+		planResetDate, parseErr := time.ParseInLocation(dateFormat, metrics.NextReset, timeZone)
 		if parseErr != nil {
-			log.Printf("Failed to parse plan reset date: %v", parseErr)
+			log.Printf("Failed to parse plan reset date for account %s: %v", accountName, parseErr)
 			continue
 		}
-
-		// Calculate time until expiration
-		timeUntilExpiration := planResetDate.Sub(time.Now()).Seconds()
-		if timeUntilExpiration < 0 {
-			timeUntilExpiration = 0
-		}
-
+		currentTime := time.Now().In(timeZone)
+		timeUntilExpiration := planResetDate.Sub(currentTime).Seconds()
 		e.planExpiration.WithLabelValues(accountName).Set(timeUntilExpiration)
-		e.httpReturnCode.WithLabelValues(accountName).Set(float64(statusCode)) 
+		e.httpReturnCode.WithLabelValues(accountName).Set(float64(statusCode))
 		e.httpResponseTime.WithLabelValues(accountName).Set(responseTime.Seconds())
 	}
-
-	// Collect all metrics once
 	e.emailLimit.Collect(ch)
 	e.emailRemaining.Collect(ch)
 	e.emailUsed.Collect(ch)
