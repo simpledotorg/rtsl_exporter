@@ -31,5 +31,5 @@ jobs:
       - uses: clowdhaus/argo-cd-action/@main
         with:
           version: 2.6.7
-          command: version
-          options: --client
+          command: login ${{ secrets.SANDBOX_ARGOCD_ENDPOINT }}
+          options: --username ${{ secrets.SANDBOX_ARGOCD_USERNAME }} --password ${{ secrets.SANDBOX_ARGOCD_PASSWORD }}
