@@ -20,13 +20,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_SIMPLEDOTORG_USERNAME }}
           password: ${{ secrets.DOCKERHUB_SIMPLEDOTORG_ACCESS_TOCKEN }}
 
-      # - name: Build and push
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: ./Dockerfile
-      #     push: true
-      #     tags: simpledotorg/rtsl_exporter:${{ github.sha }}, simpledotorg/rtsl_exporter:latest
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: simpledotorg/rtsl_exporter:${{ github.sha }}, simpledotorg/rtsl_exporter:latest
           
       - uses: clowdhaus/argo-cd-action/@main
         with:
@@ -36,4 +36,8 @@ jobs:
       - uses: clowdhaus/argo-cd-action/@main
         with:
           version: 2.7.3
-          command: app list
+          command: app set rtsl-exporter --helm-set image.tag=${{ github.sha }}
+      - uses: clowdhaus/argo-cd-action/@main
+        with:
+          version: 2.7.3
+          command: app wait rtsl-exporter --timeout 600
