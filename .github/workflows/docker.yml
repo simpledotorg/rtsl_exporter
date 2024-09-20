@@ -33,3 +33,7 @@ jobs:
           version: 2.7.3
           command: login ${{ secrets.SANDBOX_ARGOCD_ENDPOINT }}
           options: --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.SANDBOX_ARGOCD_PASSWORD }}
+      - uses: clowdhaus/argo-cd-action/@main
+        with:
+          version: 2.7.3
+          command: app list
