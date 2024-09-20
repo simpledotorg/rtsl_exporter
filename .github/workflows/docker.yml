@@ -19,10 +19,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_SIMPLEDOTORG_USERNAME }}
           password: ${{ secrets.DOCKERHUB_SIMPLEDOTORG_ACCESS_TOCKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
+      # - name: Build and push
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     push: true
+      #     tags: simpledotorg/rtsl_exporter:${{ github.sha }}, simpledotorg/rtsl_exporter:latest
+          
+      - uses: clowdhaus/argo-cd-action/@main
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: simpledotorg/rtsl_exporter:${{ github.sha }}, simpledotorg/rtsl_exporter:latest
+          version: 2.6.7
+          command: version
+          options: --client
