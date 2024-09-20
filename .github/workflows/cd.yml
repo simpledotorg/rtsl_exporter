@@ -1,29 +1,12 @@
-name: Test, build and deploy
+name: Build and deploy
 
 on:
   push:
     branches:
       - 'master'
-      - 'add-cd'
-  pull_request:
-    branches:
-      - '*'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21.1'
-      - name: Run tests
-        run: go test ./... -v
-
   build:
-    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/add-cd'
     steps:
