@@ -4,6 +4,10 @@ metadata:
   name: {{ include "rtsl-exporter.fullname" . }}
   labels:
     {{- include "rtsl-exporter.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.autoDeployConfig }}
+    secret.reloader.stakater.com/reload: {{ .Values.existingConfigSecrete.name }}
+    {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
