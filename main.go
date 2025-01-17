@@ -84,13 +84,14 @@ func main() {
 	}
 	dhis2Exporter := dhis2.NewExporter(dhis2Clients)
 	prometheus.MustRegister(dhis2Exporter)
-	// Register SendGrid exporters with time zones
+	// Register SendGrid exporters with time zones and handle subusers
 	sendGridConfigMap := make(map[string]sendgrid.AccountConfig)
 	for _, account := range config.SendGridAccounts {
 		sendGridConfigMap[account.AccountName] = sendgrid.AccountConfig{
 			AccountName: account.AccountName,
 			APIKey:      account.APIKey,
 			TimeZone:    account.TimeZone,
+			Subusers:    account.Subusers,
 		}
 	}
 	sendgridExporter := sendgrid.NewExporter(sendGridConfigMap)

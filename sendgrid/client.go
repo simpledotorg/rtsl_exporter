@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+const BaseURL = "https://api.sendgrid.com/v3"
+
+// Client struct holds the API keys for the accounts
 type Client struct {
 	APIKeys map[string]string
 }
@@ -33,7 +36,42 @@ func (c *Client) FetchMetrics(accountName string) (*SendgridCreditsResponse, int
 	}
 
 	start := time.Now()
-	url := "https://api.sendgrid.com/v3/user/credits"
+	url := fmt.Sprintf("%s/user/credits", BaseURL)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	duration := time.Since(start)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Received non-200 response code: %d", resp.StatusCode)
+		return nil, resp.StatusCode, duration, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var creditsResponse SendgridCreditsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&creditsResponse); err != nil {
+		return nil, resp.StatusCode, duration, err
+	}
+
+	return &creditsResponse, resp.StatusCode, duration, nil
+}
+
+// FetchMetricsForSubuser retrieves metrics for a specific subuser
+func (c *Client) FetchMetricsForSubuser(subuserName, accountName string) (*SendgridCreditsResponse, int, time.Duration, error) {
+	apiKey, exists := c.APIKeys[accountName]
+	if !exists {
+		return nil, 0, 0, fmt.Errorf("API key for account %s not found", accountName)
+	}
+
+	start := time.Now()
+	url := fmt.Sprintf("%s/subusers/%s/credits", BaseURL, subuserName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, 0, 0, err

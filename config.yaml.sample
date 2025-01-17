@@ -10,6 +10,10 @@ sendgrid_accounts:
   - account_name: "Account1"
     api_key: "key"
     time_zone: "timezone"
+    subusers:
+      - subuser_name: "Subuser1"
+        api_key: "subuser_key"
+        time_zone: "subuser_timezone"
   - account_name: "Account2"
     api_key: "key"
     time_zone: "timezone"
