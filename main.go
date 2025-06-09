@@ -5,7 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/simpledotorg/rtsl_exporter/alphasms"
-	"github.com/simpledotorg/rtsl_exporter/dhis2"
 	"github.com/simpledotorg/rtsl_exporter/sendgrid"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -19,11 +18,6 @@ import (
 type Config struct {
 	ALPHASMSAPIKey   string                   `yaml:"alphasms_api_key"`
 	SendGridAccounts []sendgrid.AccountConfig `yaml:"sendgrid_accounts"`
-	DHIS2Endpoints   []struct {
-		BaseURL  string `yaml:"base_url"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-	} `yaml:"dhis2_endpoints"`
 }
 
 func readConfig(configPath string) (*Config, error) {
@@ -71,19 +65,6 @@ func main() {
 	alphasmsClient := alphasms.Client{APIKey: config.ALPHASMSAPIKey}
 	alphasmsExporter := alphasms.NewExporter(&alphasmsClient)
 	prometheus.MustRegister(alphasmsExporter)
-	// DHIS2
-	dhis2Clients := []*dhis2.Client{}
-	for _, endpoint := range config.DHIS2Endpoints {
-		dhis2Client := dhis2.Client{
-			Username:          endpoint.Username,
-			Password:          endpoint.Password,
-			BaseURL:           endpoint.BaseURL,
-			ConnectionTimeout: dhis2.DefaultConnectionTimeout,
-		}
-		dhis2Clients = append(dhis2Clients, &dhis2Client)
-	}
-	dhis2Exporter := dhis2.NewExporter(dhis2Clients)
-	prometheus.MustRegister(dhis2Exporter)
 	// Register SendGrid exporters with time zones and handle subusers
 	sendGridConfigMap := make(map[string]sendgrid.AccountConfig)
 	for _, account := range config.SendGridAccounts {
